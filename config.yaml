@@ -29,5 +29,3 @@ binds:
                       stdio:
                         cmd: npx
                         args: ["@modelcontextprotocol/server-everything"]
-
-                        
