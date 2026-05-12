@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://agentgateway.dev/schema/config
+
+llm:
+  models:
+    - name: "gpt-5.4-nano"
+      provider: openAI
+      params:
+        model: "gpt-5.4-nano"
+        apiKey: "$OPENAI_API_KEY"
+
+binds:
+  - port: 3000
+    listeners:
+      - routes:
+          - policies:
+              cors:
+                allowOrigins:
+                  - "*"
+                allowHeaders:
+                  - mcp-protocol-version
+                  - content-type
+                  - cache-control
+                exposeHeaders:
+                  - "Mcp-Session-Id"
+            backends:
+              - mcp:
+                  targets:
+                    - name: everything
+                      stdio:
+                        cmd: npx
+                        args: ["@modelcontextprotocol/server-everything"]
