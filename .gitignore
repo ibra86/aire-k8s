@@ -3,3 +3,6 @@
 .idea
 .env
 .pre-commit-config.yaml
+
+.terraform*
+abox-config
