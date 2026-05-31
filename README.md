@@ -82,17 +82,62 @@ In k9s, verify that nodes are ready and pods are running in
 - `flux-system`
 - `kagent`
 
-Inject the OPENAI_API_KEY env var into the `kagent` namespace as a Kubernetes Secret:
+Inject the `OPENAI_API_KEY` env var into the `kagent` namespace as a Kubernetes Secret for the default kagent models:
 
 ```bash
-kubectl create secret generic kagent-openai \
+k create secret generic kagent-openai \
   -n kagent \
   --from-literal=OPENAI_API_KEY="$OPENAI_API_KEY" \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --dry-run=client -o yaml | k apply -f -
 
-KEY=$(kubectl get secret kagent-openai -n kagent -o jsonpath='{.data.OPENAI_API_KEY}' | base64 -d)
+KEY=$(k get secret kagent-openai -n kagent -o jsonpath='{.data.OPENAI_API_KEY}' | base64 -d)
 echo "${KEY:0:12}... length=${#KEY}"
 
-kubectl rollout restart deploy -n kagent
-kubectl get pods -n kagent -w
+k rollout restart deploy -n kagent
+k get pods -n kagent -w
+```
+
+Create the secret used by the manual `openai-gpt-5-nano` model:
+
+```bash
+k create secret generic openai-gpt-5-nano \
+  -n kagent \
+  --from-literal=OPENAI_API_KEY="$OPENAI_API_KEY" \
+  --dry-run=client -o yaml | k apply -f -
+
+KEY=$(k get secret kagent-openai -n kagent -o jsonpath='{.data.OPENAI_API_KEY}' | base64 -d)
+echo "${KEY:0:12}... length=${#KEY}"
+
+k rollout restart deploy -n kagent
+k get pods -n kagent -w
+```
+
+Apply the manual kagent resources:
+
+```bash
+k apply -f manual/modelconfig-openai-gpt-5-nano.yaml
+k apply -f manual/mcpserver-fetch.yaml
+k apply -f manual/agent-website-fetch.yaml
+```
+
+Or apply all manual resources at once:
+
+```bash
+k apply -f manual/
+```
+
+Verify that the model, MCP server, and agent are accepted:
+
+```bash
+k get modelconfig,mcpserver,agent -n kagent
+k describe modelconfig openai-gpt-5-nano -n kagent
+k describe mcpserver mcp-server-fetch -n kagent
+k describe agent website-fetch-agent -n kagent
+```
+
+Open the kagent UI:
+
+```bash
+KG_UI_POD=$(k get po -n kagent -o name | grep pod/kagent-ui)
+k port-forward -n kagent "$KG_UI_POD" 8080:8080
 ```
