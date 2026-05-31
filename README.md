@@ -56,7 +56,8 @@ Open the forwarded `15000` port to inspect the AgentGateway UI.
 
 ## 2. abox Kubernetes stack
 
-The full Kubernetes setup lives in [abox](./abox/README.md). It provisions KinD, Flux CD, AgentGateway, kagent, and LoadBalancer support.
+The full Kubernetes setup lives in [abox](./abox/README.md). It provisions Kubernetes, Flux CD, AgentGateway, kagent,
+and LoadBalancer support.
 
 Run the stack:
 
@@ -160,10 +161,27 @@ Build the image:
 docker build -t adk-a2a-agent:local ./adk-agent
 ```
 
-Load it into the `abox` KinD cluster:
+Test the image locally:
 
 ```bash
-kind load docker-image adk-a2a-agent:local --name abox
+docker run --rm \
+  -p 8081:8080 \
+  -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+  -e ADK_AGENT_MODEL="openai/gpt-5-nano" \
+  adk-a2a-agent:local
+```
+
+Fetch the local A2A Agent Card:
+
+```bash
+curl http://localhost:8081/.well-known/agent-card.json | jq
+```
+
+Publish the image to a registry available to Kubernetes:
+
+```bash
+docker tag adk-a2a-agent:local ghcr.io/ibra86/aire-k8s/adk-a2a-agent:latest
+docker push ghcr.io/ibra86/aire-k8s/adk-a2a-agent:latest
 ```
 
 Deploy the agent:

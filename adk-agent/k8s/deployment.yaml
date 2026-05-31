@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: adk-a2a-agent
-          image: adk-a2a-agent:local
-          imagePullPolicy: Never
+          image: ghcr.io/ibra86/aire-k8s/adk-a2a-agent:latest
+          imagePullPolicy: Always
           env:
             - name: ADK_AGENT_MODEL
               value: openai/gpt-5-nano
