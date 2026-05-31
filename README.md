@@ -115,15 +115,15 @@ k get pods -n kagent -w
 Apply the manual kagent resources:
 
 ```bash
-k apply -f manual/modelconfig-openai-gpt-5-nano.yaml
-k apply -f manual/mcpserver-fetch.yaml
-k apply -f manual/agent-website-fetch.yaml
+k apply -f abox/releases/manual/modelconfig-openai-gpt-5-nano.yaml
+k apply -f abox/releases/manual/mcpserver-fetch.yaml
+k apply -f abox/releases/manual/agent-website-fetch.yaml
 ```
 
 Or apply all manual resources at once:
 
 ```bash
-k apply -f manual/
+k apply -f abox/releases/manual/
 ```
 
 Verify that the model, MCP server, and agent are accepted:
@@ -138,7 +138,7 @@ k describe agent website-fetch-agent -n kagent
 Delete the manual kagent resources when they are no longer needed:
 
 ```bash
-k delete -f manual/
+k delete -f abox/releases/manual/
 k delete secret openai-gpt-5-nano -n kagent --ignore-not-found
 ```
 
@@ -147,4 +147,51 @@ Open the kagent UI:
 ```bash
 KG_UI_POD=$(k get po -n kagent -o name | grep pod/kagent-ui)
 k port-forward -n kagent "$KG_UI_POD" 8080:8080
+```
+
+## 3. ADK A2A agent
+
+The `adk-agent` directory contains a standalone ADK agent exposed through A2A. ADK generates the Agent Card
+automatically and serves it from the well-known discovery endpoint.
+
+Build the image:
+
+```bash
+docker build -t adk-a2a-agent:local ./adk-agent
+```
+
+Load it into the `abox` KinD cluster:
+
+```bash
+kind load docker-image adk-a2a-agent:local --name abox
+```
+
+Deploy the agent:
+
+```bash
+k apply -f adk-agent/k8s/
+```
+
+Verify the pod and service:
+
+```bash
+k get deploy,svc,pod -n kagent | grep adk-a2a-agent
+```
+
+Expose the service locally:
+
+```bash
+k port-forward -n kagent svc/adk-a2a-agent 8081:8080
+```
+
+Fetch the A2A Agent Card:
+
+```bash
+curl http://localhost:8081/.well-known/agent-card.json | jq
+```
+
+Delete the ADK A2A agent:
+
+```bash
+k delete -f adk-agent/k8s/
 ```
