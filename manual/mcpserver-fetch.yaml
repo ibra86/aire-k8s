@@ -1,0 +1,17 @@
+---
+apiVersion: kagent.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: mcp-server-fetch
+  namespace: kagent
+spec:
+  deployment:
+    args:
+      - mcp-server-fetch
+    cmd: uvx
+    image: ghcr.io/astral-sh/uv:debian
+    port: 3000
+    replicas: 1
+  stdioTransport: {}
+  timeout: 30s
+  transportType: stdio

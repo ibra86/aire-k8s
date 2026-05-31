@@ -3,3 +3,8 @@
 .idea
 .env
 .pre-commit-config.yaml
+
+.terraform*
+abox-config
+/.prettierrc.yaml
+/.yamllint.yaml
