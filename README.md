@@ -135,6 +135,13 @@ k describe mcpserver mcp-server-fetch -n kagent
 k describe agent website-fetch-agent -n kagent
 ```
 
+Delete the manual kagent resources when they are no longer needed:
+
+```bash
+k delete -f manual/
+k delete secret openai-gpt-5-nano -n kagent --ignore-not-found
+```
+
 Open the kagent UI:
 
 ```bash
