@@ -106,7 +106,7 @@ k create secret generic openai-gpt-5-nano \
   --from-literal=OPENAI_API_KEY="$OPENAI_API_KEY" \
   --dry-run=client -o yaml | k apply -f -
 
-KEY=$(k get secret kagent-openai -n kagent -o jsonpath='{.data.OPENAI_API_KEY}' | base64 -d)
+KEY=$(k get secret openai-gpt-5-nano -n kagent -o jsonpath='{.data.OPENAI_API_KEY}' | base64 -d)
 echo "${KEY:0:12}... length=${#KEY}"
 
 k rollout restart deploy -n kagent
@@ -121,12 +121,6 @@ k apply -f abox/releases/manual/mcpserver-fetch.yaml
 k apply -f abox/releases/manual/agent-website-fetch.yaml
 ```
 
-Or apply all manual resources at once:
-
-```bash
-k apply -f abox/releases/manual/
-```
-
 Verify that the model, MCP server, and agent are accepted:
 
 ```bash
@@ -139,7 +133,9 @@ k describe agent website-fetch-agent -n kagent
 Delete the manual kagent resources when they are no longer needed:
 
 ```bash
-k delete -f abox/releases/manual/
+k delete -f abox/releases/manual/agent-website-fetch.yaml
+k delete -f abox/releases/manual/mcpserver-fetch.yaml
+k delete -f abox/releases/manual/modelconfig-openai-gpt-5-nano.yaml
 k delete secret openai-gpt-5-nano -n kagent --ignore-not-found
 ```
 
@@ -212,4 +208,105 @@ Delete the ADK A2A agent:
 
 ```bash
 k delete -f adk-agent/k8s/
+```
+
+## 4. Inventory, MCP governance, and Qdrant
+
+Install Agent Registry inventory into abox:
+
+```bash
+helm upgrade --install agentregistry ./agentregistry-inventory/charts/agentregistry \
+  -n agentregistry \
+  --create-namespace \
+  -f abox/releases/manual/agentregistry-values.yaml
+```
+
+Configure inventory discovery for the abox AI resources:
+
+```bash
+k apply -f abox/releases/manual/agentregistry-discovery-abox.yaml
+```
+
+Verify Agent Registry:
+
+```bash
+k get pods,svc -n agentregistry
+k get discoveryconfig -n agentregistry
+```
+
+List discovered AI resources:
+
+```bash
+k get mcpservercatalog,agentcatalog,modelcatalog,skillcatalog -n agentregistry
+k get mcpservercatalog -n agentregistry -o wide
+k get agentcatalog -n agentregistry -o wide
+k get modelcatalog -n agentregistry -o wide
+```
+
+Open the Agent Registry API/UI locally:
+
+```bash
+k port-forward -n agentregistry svc/agentregistry-api 8082:8080
+```
+
+Query the inventory API:
+
+```bash
+curl http://localhost:8082/v0/servers | jq
+curl http://localhost:8082/v0/agents | jq
+curl http://localhost:8082/v0/skills | jq
+```
+
+Deploy MCP Security Governance:
+
+```bash
+helm upgrade --install mcp-governance ./mcp-security-governance/charts/mcp-governance \
+  -n mcp-governance \
+  --create-namespace \
+  -f abox/releases/manual/mcp-governance-values.yaml
+```
+
+Verify MCP Security Governance:
+
+```bash
+k get pods,svc -n mcp-governance
+k get mcpgovernancepolicy,governanceevaluation -n mcp-governance
+```
+
+Open the MCP Security Governance dashboard:
+
+```bash
+k port-forward -n mcp-governance svc/mcp-governance-dashboard 3000:3000
+```
+
+Deploy Qdrant:
+
+```bash
+helm repo add qdrant https://qdrant.github.io/qdrant-helm
+helm repo update
+helm upgrade --install qdrant qdrant/qdrant \
+  -n qdrant \
+  --create-namespace \
+  -f abox/releases/manual/qdrant-values.yaml
+```
+
+Verify Qdrant:
+
+```bash
+k get pods,svc,pvc -n qdrant
+k port-forward -n qdrant svc/qdrant 6333:6333
+curl http://localhost:6333/collections | jq
+```
+
+Delete these components when they are no longer needed:
+
+```bash
+helm uninstall agentregistry -n agentregistry
+k delete namespace agentregistry --ignore-not-found
+
+helm uninstall mcp-governance -n mcp-governance
+k delete namespace mcp-governance --ignore-not-found
+
+helm uninstall qdrant -n qdrant
+k delete namespace qdrant --ignore-not-found
 ```

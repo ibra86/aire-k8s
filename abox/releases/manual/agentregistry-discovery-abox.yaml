@@ -1,0 +1,22 @@
+---
+apiVersion: agentregistry.dev/v1alpha1
+kind: DiscoveryConfig
+metadata:
+  name: abox-local
+  namespace: agentregistry
+spec:
+  environments:
+    - name: abox
+      cluster:
+        name: abox
+      discoveryEnabled: true
+      namespaces:
+        - kagent
+        - agentgateway-system
+      resourceTypes:
+        - MCPServer
+        - RemoteMCPServer
+        - Agent
+        - ModelConfig
+      labels:
+        environment: abox

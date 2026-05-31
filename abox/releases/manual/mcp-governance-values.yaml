@@ -1,0 +1,36 @@
+---
+createNamespace: false
+
+controller:
+  image:
+    repository: ghcr.io/techwithhuz/mcp-governance-controller
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+
+dashboard:
+  enabled: true
+  image:
+    repository: ghcr.io/techwithhuz/mcp-governance-dashboard
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+
+samples:
+  install: true
+
+governancePolicy:
+  spec:
+    aiAgent:
+      enabled: false
+    targetNamespaces:
+      - kagent
+      - agentgateway-system
+    excludeNamespaces:
+      - kube-system
+      - kube-public
+      - kube-node-lease
+      - local-path-storage
+      - flux-system
