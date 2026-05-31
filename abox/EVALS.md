@@ -3,6 +3,7 @@
 You are evaluating the quality of a PR review that was produced by an AI reviewer for the **abox** repository.
 
 You will be given:
+
 1. The PR diff
 2. The AI reviewer's output
 
@@ -45,20 +46,21 @@ One paragraph. Is this review trustworthy? Would you rely on it to gate a merge?
 
 Start at 10. Deduct points as follows:
 
-| Issue | Deduction |
-|---|---|
-| Missed `[critical]` issue | −3 per issue |
-| Missed `[important]` issue | −2 per issue |
-| False positive flagged as `[critical]` or `[important]` | −2 per instance |
-| False positive flagged as `[suggestion]` | −0.5 per instance |
-| Blocker buried after 5+ nits/suggestions | −1 |
-| `[critical]` or `[important]` comment has no fix or direction | −1 per instance |
-| Vague comment with no explanation or fix | −0.5 per instance |
-| Summary contradicts or misrepresents the body | −1 |
-| Reviewed unchanged files not in the diff | −0.5 per file |
-| Approved a PR with an unaddressed `[critical]` issue | −3 |
+| Issue                                                         | Deduction         |
+| ------------------------------------------------------------- | ----------------- |
+| Missed `[critical]` issue                                     | −3 per issue      |
+| Missed `[important]` issue                                    | −2 per issue      |
+| False positive flagged as `[critical]` or `[important]`       | −2 per instance   |
+| False positive flagged as `[suggestion]`                      | −0.5 per instance |
+| Blocker buried after 5+ nits/suggestions                      | −1                |
+| `[critical]` or `[important]` comment has no fix or direction | −1 per instance   |
+| Vague comment with no explanation or fix                      | −0.5 per instance |
+| Summary contradicts or misrepresents the body                 | −1                |
+| Reviewed unchanged files not in the diff                      | −0.5 per file     |
+| Approved a PR with an unaddressed `[critical]` issue          | −3                |
 
 **Thresholds:**
+
 - 8–10: **Pass** — review is trustworthy, safe to use as a merge gate
 - 5–7: **Needs Improvement** — usable but requires human double-check on flagged areas
 - 0–4: **Fail** — do not rely on this review to gate a merge
@@ -107,6 +109,7 @@ Evaluate the review's structure and usefulness independently:
 ### Example A — Reviewer correctly catches a missing dependsOn
 
 **Diff:**
+
 ```yaml
 # releases/prometheus.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -121,6 +124,7 @@ spec:
 ```
 
 **Reviewer output:**
+
 ```
 [critical] releases/prometheus.yaml — HelmRelease missing dependsOn
 
@@ -140,9 +144,10 @@ If the CRD HelmRelease hasn't reconciled yet, this will fail with
 ### Example B — Reviewer false-positives on the Gateway allowedRoutes pattern
 
 **Diff:**
+
 ```yaml
 # releases/agentgateway.yaml
-  listeners:
+listeners:
   - name: http
     port: 80
     protocol: HTTP
@@ -152,6 +157,7 @@ If the CRD HelmRelease hasn't reconciled yet, this will fail with
 ```
 
 **Reviewer output:**
+
 ```
 [important] releases/agentgateway.yaml — Gateway allows routes from all namespaces
 
@@ -165,15 +171,17 @@ This is a security risk. Should restrict to specific namespaces.
 ### Example C — Reviewer misses a namespace split problem
 
 **Diff adds `releases/tracing.yaml`:**
+
 ```yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: jaeger
-  namespace: observability   # namespace defined in releases/crds/tracing-crds.yaml
+  namespace: observability # namespace defined in releases/crds/tracing-crds.yaml
 ```
 
 **Reviewer output:**
+
 ```
 [nit] releases/tracing.yaml — Consider adding a comment explaining the namespace
 ```
@@ -185,6 +193,7 @@ metadata:
 ### Example D — Reviewer buries a blocker under nits
 
 **Reviewer output (condensed):**
+
 ```
 [nit] releases/newapp.yaml:3 — resource name could be more descriptive
 [nit] releases/newapp.yaml:8 — consider adding labels for consistency
@@ -201,12 +210,14 @@ metadata:
 ### Example E — Reviewer approves with unresolved critical
 
 **Reviewer output ends with:**
+
 ```
 Overall: Looks good, minor style issues only.
 Recommendation: Approve
 ```
 
 **...but the body contains:**
+
 ```
 [critical] releases/newapp.yaml:30 — HTTPRoute has no ReferenceGrant
 ```
@@ -218,6 +229,7 @@ Recommendation: Approve
 ### Example F — Reviewer flags YAML style as a blocker
 
 **Reviewer output:**
+
 ```
 [important] releases/kagent.yaml — YAML indentation is inconsistent
 This could cause parsing errors.
@@ -229,13 +241,13 @@ This could cause parsing errors.
 
 ## Common Reviewer Failure Modes
 
-| Failure mode | What it looks like | Impact |
-|---|---|---|
-| **Convention blindness** | Flags intentional patterns (e.g. `from: All`, `prune: true`) as bugs | False positives, erodes trust |
-| **Nit flood** | 6+ nit/suggestion comments, 0 real issues | Buries signal, wastes author time |
-| **Approve-with-blocker** | Recommendation says Approve, body has `[critical]` | Directly dangerous |
-| **Vague warnings** | "This might cause issues" — no specific failure path | Unhelpful, can't act on it |
-| **Unchanged file scope creep** | Comments on files not in the diff | Off-topic noise |
-| **Missing fix** | `[critical]` with no direction on how to resolve | Author blocked |
-| **Summary mismatch** | Summary says "looks good" but body has blockers | Misleading to approvers |
-| **Generic security advice** | Applies Kubernetes hardening guidance that contradicts intentional sandbox design | False positives |
+| Failure mode                   | What it looks like                                                                | Impact                            |
+| ------------------------------ | --------------------------------------------------------------------------------- | --------------------------------- |
+| **Convention blindness**       | Flags intentional patterns (e.g. `from: All`, `prune: true`) as bugs              | False positives, erodes trust     |
+| **Nit flood**                  | 6+ nit/suggestion comments, 0 real issues                                         | Buries signal, wastes author time |
+| **Approve-with-blocker**       | Recommendation says Approve, body has `[critical]`                                | Directly dangerous                |
+| **Vague warnings**             | "This might cause issues" — no specific failure path                              | Unhelpful, can't act on it        |
+| **Unchanged file scope creep** | Comments on files not in the diff                                                 | Off-topic noise                   |
+| **Missing fix**                | `[critical]` with no direction on how to resolve                                  | Author blocked                    |
+| **Summary mismatch**           | Summary says "looks good" but body has blockers                                   | Misleading to approvers           |
+| **Generic security advice**    | Applies Kubernetes hardening guidance that contradicts intentional sandbox design | False positives                   |

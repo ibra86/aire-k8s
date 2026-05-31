@@ -28,6 +28,7 @@ Explanation. Why it matters. How to fix it (with snippet if helpful).
 **Recommendation** (end of review): one of — `Approve` / `Request Changes` / `Comment`
 
 Rules:
+
 - Group comments by file
 - One comment per distinct issue
 - Lead every comment with a severity label: `[critical]`, `[important]`, `[suggestion]`, `[nit]`
@@ -38,12 +39,12 @@ Rules:
 
 ## Severity
 
-| Label | Meaning | Block merge? |
-|---|---|---|
-| `[critical]` | Cluster breakage, data loss, security issue, reconciliation failure | Yes |
-| `[important]` | Forbidden pattern, likely subtle failure, missing dependency | Yes (unless waived) |
-| `[suggestion]` | Better approach exists, minor clarity improvement | No — author's call |
-| `[nit]` | Tiny style/naming thing | No — ignore freely |
+| Label          | Meaning                                                             | Block merge?        |
+| -------------- | ------------------------------------------------------------------- | ------------------- |
+| `[critical]`   | Cluster breakage, data loss, security issue, reconciliation failure | Yes                 |
+| `[important]`  | Forbidden pattern, likely subtle failure, missing dependency        | Yes (unless waived) |
+| `[suggestion]` | Better approach exists, minor clarity improvement                   | No — author's call  |
+| `[nit]`        | Tiny style/naming thing                                             | No — ignore freely  |
 
 When unsure: default to `[suggestion]`.
 
@@ -81,22 +82,26 @@ When unsure: default to `[suggestion]`.
 ## What to Flag vs. Suggest vs. Ignore
 
 **Flag `[critical]`:**
+
 - A HelmRelease for an app in `releases/` has no `dependsOn` referencing its CRD release — reconciliation will fail with a "no matches for kind" error
 - A namespace is defined only in `releases/crds/` but the HelmRelease that uses it is in `releases/` — namespace won't exist when app reconciles
 - `ref.tag: latest` in any HelmRelease — non-reproducible and Flux won't detect updates
 - An HTTPRoute in namespace A references a gateway in namespace B with no ReferenceGrant in namespace A — route will be permanently rejected
 
 **Flag `[important]`:**
+
 - `hashicorp/kubernetes` provider used instead of `gavinbunney/kubectl` for RSIP or ResourceSet — breaks single-pass `tofu apply`
 - kagent bumped past `0.7.23` without verifying label values — `+` build metadata in labels is invalid in Kubernetes
 - Patch version in `make push` logic allowed to exceed 9 — RSIP lexicographic sort will stop picking it up
 
 **Suggest `[suggestion]`:**
+
 - A component exposes a UI but has no HTTPRoute to reach it
 - A HelmRelease uses `semver: ">=x.y.z"` when a pinned tag would be safer
 - A new component's namespace is not pre-created (Flux will create it, but explicit is clearer)
 
 **Ignore:**
+
 - YAML whitespace and comment style
 - Personal preferences on resource ordering within a file
 - Using `flux-system` namespace for OCIRepository sources (that's the established pattern)

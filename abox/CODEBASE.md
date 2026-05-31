@@ -12,16 +12,16 @@ abox is a **local AI infrastructure sandbox**. A single `make run` provisions a 
 
 ## Tech Stack
 
-| Layer | Tech | Version |
-|---|---|---|
-| Cluster | KinD | latest |
-| GitOps operator | Flux CD (Flux Operator + FluxInstance) | 2.x |
-| Infrastructure as code | OpenTofu | latest |
-| AI gateway | agentgateway | v2.2.1 |
-| Agent runtime | kagent | 0.7.23 (pinned) |
-| Gateway API | gateway-api-crds | 1.4.0 |
-| OCI artifact store | GHCR | — |
-| CI | GitHub Actions | — |
+| Layer                  | Tech                                   | Version         |
+| ---------------------- | -------------------------------------- | --------------- |
+| Cluster                | KinD                                   | latest          |
+| GitOps operator        | Flux CD (Flux Operator + FluxInstance) | 2.x             |
+| Infrastructure as code | OpenTofu                               | latest          |
+| AI gateway             | agentgateway                           | v2.2.1          |
+| Agent runtime          | kagent                                 | 0.7.23 (pinned) |
+| Gateway API            | gateway-api-crds                       | 1.4.0           |
+| OCI artifact store     | GHCR                                   | —               |
+| CI                     | GitHub Actions                         | —               |
 
 ---
 
@@ -78,13 +78,13 @@ scripts/
 
 ### Component roles
 
-| Component | Namespace | What it does |
-|---|---|---|
-| agentgateway | `agentgateway-system` | Gateway API controller; handles AI/MCP-aware routing |
-| Gateway `agentgateway-external` | `agentgateway-system` | Single ingress point, port 80, allows routes from all namespaces |
-| kagent | `kagent` | AI agent runtime; exposes MCP server on `:8083`, UI on `:8080` |
-| HTTPRoute `kagent` | `kagent` | Routes `/api` → kagent MCP, `/` → kagent UI |
-| ReferenceGrant `kagent` | `kagent` | Allows the HTTPRoute to reference the gateway in a different namespace |
+| Component                       | Namespace             | What it does                                                           |
+| ------------------------------- | --------------------- | ---------------------------------------------------------------------- |
+| agentgateway                    | `agentgateway-system` | Gateway API controller; handles AI/MCP-aware routing                   |
+| Gateway `agentgateway-external` | `agentgateway-system` | Single ingress point, port 80, allows routes from all namespaces       |
+| kagent                          | `kagent`              | AI agent runtime; exposes MCP server on `:8083`, UI on `:8080`         |
+| HTTPRoute `kagent`              | `kagent`              | Routes `/api` → kagent MCP, `/` → kagent UI                            |
+| ReferenceGrant `kagent`         | `kagent`              | Allows the HTTPRoute to reference the gateway in a different namespace |
 
 ---
 
@@ -111,15 +111,15 @@ scripts/
 
 ## Forbidden Patterns
 
-| Pattern | Why |
-|---|---|
-| `ref.tag: latest` in any HelmRelease | Non-reproducible; Flux won't detect updates |
-| App HelmRelease without `dependsOn` pointing to its CRD release | CRD may not exist when app reconciles |
-| HTTPRoute referencing a gateway in another namespace without ReferenceGrant | Route will be rejected by the gateway controller |
-| Namespace resource only in `releases/crds/` when the app is in `releases/` | CRD kustomization runs in a separate reconcile; namespace may not exist when app installs |
-| Patch version > 9 without bumping minor | RSIP uses lexicographic sort: `0.3.10` < `0.3.9` |
+| Pattern                                                                               | Why                                                                                          |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `ref.tag: latest` in any HelmRelease                                                  | Non-reproducible; Flux won't detect updates                                                  |
+| App HelmRelease without `dependsOn` pointing to its CRD release                       | CRD may not exist when app reconciles                                                        |
+| HTTPRoute referencing a gateway in another namespace without ReferenceGrant           | Route will be rejected by the gateway controller                                             |
+| Namespace resource only in `releases/crds/` when the app is in `releases/`            | CRD kustomization runs in a separate reconcile; namespace may not exist when app installs    |
+| Patch version > 9 without bumping minor                                               | RSIP uses lexicographic sort: `0.3.10` < `0.3.9`                                             |
 | `kubectl_manifest` replaced with `hashicorp/kubernetes` provider for RSIP/ResourceSet | `hashicorp/kubernetes` validates against CRD schema at plan time, breaking single-pass apply |
-| Pushing without verifying `flux get all` shows Ready | Broken releases are published to GHCR and reconciled automatically |
+| Pushing without verifying `flux get all` shows Ready                                  | Broken releases are published to GHCR and reconciled automatically                           |
 
 ---
 

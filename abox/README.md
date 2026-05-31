@@ -6,13 +6,13 @@
 
 ## What's included
 
-| Component | Role |
-|---|---|
-| **agentgateway v2.2.1** | AI-aware API gateway (Gateway API–native, MCP-aware) |
-| **kagent** | Kubernetes-native AI agent framework |
-| **Flux CD 2.x** | GitOps/GitLessOps operator — keeps the cluster in sync with OCI artifacts |
-| **KinD** | Local Kubernetes (1 control-plane + 2 workers) - can be any k8s |
-| **cloud-provider-kind** | LoadBalancer support so gateway gets a real IP for local development |
+| Component               | Role                                                                      |
+| ----------------------- | ------------------------------------------------------------------------- |
+| **agentgateway v2.2.1** | AI-aware API gateway (Gateway API–native, MCP-aware)                      |
+| **kagent**              | Kubernetes-native AI agent framework                                      |
+| **Flux CD 2.x**         | GitOps/GitLessOps operator — keeps the cluster in sync with OCI artifacts |
+| **KinD**                | Local Kubernetes (1 control-plane + 2 workers) - can be any k8s           |
+| **cloud-provider-kind** | LoadBalancer support so gateway gets a real IP for local development      |
 
 ## Quickstart
 
@@ -56,13 +56,13 @@ make push   # bumps patch version, tags, pushes → CI publishes OCI artifact �
 
 ## Directory layout
 
-| Path | Purpose |
-|---|---|
-| `bootstrap/` | OpenTofu: KinD + Flux bootstrap (operator, instance, RSIP, ResourceSet) |
-| `releases/crds/` | CRD HelmReleases: gateway-api, agentgateway, kagent |
-| `releases/` | App HelmReleases + Gateway + HTTPRoutes |
-| `scripts/setup.sh` | Full setup script (`make run`) |
-| `.github/workflows/flux-push.yaml` | CI: publish `releases/` as OCI artifact on `v*` tags |
+| Path                               | Purpose                                                                 |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `bootstrap/`                       | OpenTofu: KinD + Flux bootstrap (operator, instance, RSIP, ResourceSet) |
+| `releases/crds/`                   | CRD HelmReleases: gateway-api, agentgateway, kagent                     |
+| `releases/`                        | App HelmReleases + Gateway + HTTPRoutes                                 |
+| `scripts/setup.sh`                 | Full setup script (`make run`)                                          |
+| `.github/workflows/flux-push.yaml` | CI: publish `releases/` as OCI artifact on `v*` tags                    |
 
 ## Adding components
 
