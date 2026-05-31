@@ -13,7 +13,7 @@ abox is a local Kubernetes AI infrastructure sandbox. It provides a reproducible
 
 ## What we don't want (yet)
 
-- Application code or agent implementations — those belong in projects that *use* abox
+- Application code or agent implementations — those belong in projects that _use_ abox
 - Alternative cluster provisioners (minikube, k3d) — KinD is intentional
 - Replacing Flux with another GitOps tool
 
@@ -47,7 +47,7 @@ The CI workflow is at `.github/workflows/flux-push.yaml`. The RSIP filter (`^\d+
 ## Pull request guidelines
 
 - One concern per PR.
-- PR description must explain *why*, not just *what*.
+- PR description must explain _why_, not just _what_.
 - Verify `flux get all` shows all resources as `Ready` before submitting.
 - See [REVIEW.md](./REVIEW.md) for how PRs are reviewed.
 
