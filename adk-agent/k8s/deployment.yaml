@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adk-a2a-agent
+  namespace: kagent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adk-a2a-agent
+  template:
+    metadata:
+      labels:
+        app: adk-a2a-agent
+    spec:
+      containers:
+        - name: adk-a2a-agent
+          image: ghcr.io/ibra86/aire-k8s/adk-a2a-agent:latest
+          imagePullPolicy: Always
+          env:
+            - name: ADK_AGENT_MODEL
+              value: openai/gpt-5-nano
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-gpt-5-nano
+                  key: OPENAI_API_KEY
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /.well-known/agent-card.json
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
